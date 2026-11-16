@@ -30,7 +30,3 @@ Thumbs.db
 # Temporary files
 temp/
 tmp/
-
-# Keep project files local without adding them to source control
-*
-!.gitignore
