@@ -30,3 +30,11 @@ Thumbs.db
 # Temporary files
 temp/
 tmp/
+
+# Generated datasets
+data/
+
+# Keep the weather sample dataset
+!data/
+!data/weather/
+!data/weather/nyc_weather_hourly_2025_01.csv
