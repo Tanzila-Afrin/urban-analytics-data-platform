@@ -1,0 +1,65 @@
+{
+    "validation_status": "PASSED",
+    "errors_count": 0,
+    "warnings_count": 0,
+    "errors": [],
+    "warnings": [],
+    "checks": {
+        "file_readable": true,
+        "row_count": 744,
+        "column_count": 12,
+        "required_columns_present": true,
+        "missing_values": {
+            "timestamp": 0,
+            "latitude": 0,
+            "longitude": 0,
+            "location": 0,
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "precipitation": 0,
+            "rain": 0,
+            "snowfall": 0,
+            "wind_speed_10m": 0,
+            "cloud_cover": 0,
+            "weather_code": 0
+        },
+        "total_missing_values": 0,
+        "invalid_timestamps": 0,
+        "duplicate_timestamps": 0,
+        "timestamps_ordered": true,
+        "non_hourly_intervals": 0,
+        "expected_records_in_observed_range": 744,
+        "actual_unique_timestamps": 744,
+        "numeric_conversion_errors": {
+            "latitude": 0,
+            "longitude": 0,
+            "temperature_2m": 0,
+            "relative_humidity_2m": 0,
+            "precipitation": 0,
+            "rain": 0,
+            "snowfall": 0,
+            "wind_speed_10m": 0,
+            "cloud_cover": 0,
+            "weather_code": 0
+        },
+        "range_violations": {
+            "relative_humidity_2m": 0,
+            "cloud_cover": 0,
+            "temperature_2m": 0,
+            "precipitation": 0,
+            "rain": 0,
+            "snowfall": 0,
+            "wind_speed_10m": 0,
+            "latitude": 0,
+            "longitude": 0,
+            "weather_code": 0
+        },
+        "invalid_location_values": 0,
+        "summary": {
+            "first_timestamp": "2025-01-01 00:00:00",
+            "last_timestamp": "2025-01-31 23:00:00",
+            "average_temperature": -2.04,
+            "average_humidity": 62.12
+        }
+    }
+}
