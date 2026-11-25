@@ -38,3 +38,11 @@ data/
 !data/
 !data/weather/
 !data/weather/nyc_weather_hourly_2025_01.csv
+
+# Ignore generated validation reports
+data/weather/*validation_report.json
+
+# Keep the weather sample dataset
+!data/
+!data/weather/
+!data/weather/nyc_weather_hourly_2025_01.csv

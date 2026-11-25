@@ -1,3 +1,13 @@
+
+# API and data ingestion
 requests>=2.32,<3
+
+# Time-series database
 influxdb-client>=1.48,<2
+
+# Environment configuration
 python-dotenv>=1.0,<2
+
+# Data processing and quality validation
+pandas>=3.1,<4
+great_expectations>=1.25,<2

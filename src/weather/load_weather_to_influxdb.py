@@ -10,6 +10,8 @@ import csv
 import json
 import logging
 import os
+import subprocess
+import sys
 
 from datetime import datetime
 from pathlib import Path
@@ -29,10 +31,14 @@ INPUT_FILE = (
     PROJECT_ROOT / "data" / "weather" /
     "nyc_weather_hourly_2025_01.csv"
 )
-
 VALIDATION_REPORT = (
     PROJECT_ROOT / "data" / "weather" /
     "weather_validation_report.json"
+)
+
+GX_VALIDATION_REPORT = (
+    PROJECT_ROOT / "data" / "weather" /
+    "weather_gx_validation_report.json"
 )
 
 load_dotenv(PROJECT_ROOT / ".env")
@@ -85,24 +91,80 @@ logger = logging.getLogger(__name__)
 # Validation
 # --------------------------------------------------
 
-def verify_validation_report():
-    """Ensure the source dataset passed validation."""
 
-    if not VALIDATION_REPORT.exists():
+# --------------------------------------------------
+# Validation
+# --------------------------------------------------
+
+def verify_validation_report(report_file, validator_name):
+    """Ensure a validation report exists and passed."""
+
+    if not report_file.exists():
         raise FileNotFoundError(
-            f"Validation report not found: {VALIDATION_REPORT}"
+            f"{validator_name} report not found: {report_file}"
         )
 
-    with VALIDATION_REPORT.open(encoding="utf-8") as file:
+    with report_file.open(encoding="utf-8") as file:
         report = json.load(file)
 
     if report.get("validation_status") != "PASSED":
         raise ValueError(
-            "Weather dataset has not passed validation."
+            f"{validator_name} validation failed."
         )
 
-    logger.info("Source validation report: PASSED")
+    logger.info("%s validation: PASSED", validator_name)
 
+
+def run_validations():
+    """Run both validation systems before loading data."""
+
+    logger.info("Running custom weather validation...")
+
+    custom_validator = (
+        PROJECT_ROOT / "src" / "weather" /
+        "validate_weather.py"
+    )
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(custom_validator),
+            "--input",
+            str(INPUT_FILE),
+            "--report",
+            str(VALIDATION_REPORT),
+        ],
+        cwd=PROJECT_ROOT,
+        check=True,
+    )
+
+    logger.info("Running Great Expectations validation...")
+
+    gx_validator = (
+        PROJECT_ROOT / "src" / "weather" /
+        "validate_weather_gx.py"
+    )
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(gx_validator),
+        ],
+        cwd=PROJECT_ROOT,
+        check=True,
+    )
+
+    verify_validation_report(
+        VALIDATION_REPORT,
+        "Custom",
+    )
+
+    verify_validation_report(
+        GX_VALIDATION_REPORT,
+        "Great Expectations",
+    )
+
+    logger.info("All weather data validations passed.")
 
 # --------------------------------------------------
 # CSV Loading
@@ -221,7 +283,7 @@ def main():
 
     logger.info("Starting weather-to-InfluxDB pipeline.")
 
-    verify_validation_report()
+    run_validations()
 
     points = load_weather_records()
 
