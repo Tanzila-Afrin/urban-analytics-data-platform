@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Urban Analytics Data Platform — an end-to-end weather data engineering demonstration with data validation and interactive analytics.">
+  <title>Urban Analytics | Weather Intelligence</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111c30;
+      --surface2: #17243a;
+      --border: #263650;
+      --text: #edf3fc;
+      --muted: #91a3bd;
+      --accent: #55d6be;
+      --blue: #66a9ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 1240px; margin: auto; padding: 0 24px; }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: #0e192b;
+    }
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { font-size: 17px; font-weight: 750; letter-spacing: .3px; }
+    .brand span { color: var(--accent); }
+    .nav a { color: var(--muted); font-size: 13px; margin-left: 18px; }
+    .hero { padding: 58px 0 38px; }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.12; margin: 14px 0; }
+    .hero p { color: var(--muted); max-width: 760px; font-size: 16px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
+    .tag {
+      border: 1px solid var(--border);
+      color: #c5d3e7;
+      background: var(--surface);
+      border-radius: 30px;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .section-title {
+      display: flex; align-items: end; justify-content: space-between;
+      gap: 16px; margin: 38px 0 18px;
+    }
+    h2 { font-size: 22px; margin: 0; }
+    .section-title p { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+    .status {
+      color: var(--accent); font-size: 12px; font-weight: 700;
+      border: 1px solid #24675c; background: #102d2a;
+      padding: 6px 11px; border-radius: 30px; white-space: nowrap;
+    }
+    .metrics {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .metric, .panel, .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+    }
+    .metric { padding: 19px; }
+    .metric-label { color: var(--muted); font-size: 12px; }
+    .metric-value { font-size: 27px; font-weight: 750; margin-top: 5px; }
+    .metric-note { color: var(--muted); font-size: 11px; margin-top: 3px; }
+    .charts {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .panel { padding: 18px; min-width: 0; }
+    .panel h3 { font-size: 15px; margin: 0 0 2px; }
+    .panel p { color: var(--muted); font-size: 11px; margin: 0 0 15px; }
+    .chart-wrap { position: relative; height: 245px; }
+    .info-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 14px; margin-bottom: 45px;
+    }
+    .info-card { padding: 20px; }
+    .info-card h3 { font-size: 15px; margin: 0 0 8px; }
+    .info-card p, .info-card li { color: var(--muted); font-size: 13px; }
+    .info-card ul { padding-left: 18px; margin-bottom: 0; }
+    .pipeline {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 8px; margin-top: 14px;
+    }
+    .pipeline span {
+      background: var(--surface2); border: 1px solid var(--border);
+      padding: 9px 12px; border-radius: 8px; font-size: 12px;
+    }
+    .pipeline b { color: var(--accent); }
+    .loading {
+      padding: 25px; color: var(--muted);
+      background: var(--surface); border-radius: 12px;
+    }
+    .error { color: #ff9c9c; }
+    footer {
+      border-top: 1px solid var(--border); padding: 25px 0;
+      color: var(--muted); font-size: 12px;
+    }
+    .footer-inner { display: flex; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
+    @media (max-width: 800px) {
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      .charts { grid-template-columns: 1fr; }
+      .nav { align-items: flex-start; padding: 17px 0; flex-direction: column; }
+      .nav a { margin: 0 14px 0 0; }
+      .hero { padding-top: 38px; }
+      .section-title { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="brand">URBAN<span>ANALYTICS</span></div>
+    <nav>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#pipeline">Architecture</a>
+      <a href="https://github.com/Tanzila-Afrin/urban-analytics-data-platform" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="eyebrow">Data Engineering · Analytics · Observability</div>
+    <h1>Weather Intelligence<br>for Urban Analytics.</h1>
+    <p>
+      An end-to-end data engineering demonstration that ingests hourly
+      weather observations, validates data quality, stores time-series
+      records, and presents actionable insights through interactive
+      visual analytics.
+    </p>
+    <div class="tags">
+      <span class="tag">Python</span>
+      <span class="tag">Great Expectations</span>
+      <span class="tag">InfluxDB</span>
+      <span class="tag">Grafana</span>
+      <span class="tag">Docker</span>
+      <span class="tag">Time-Series Analytics</span>
+    </div>
+  </section>
+
+  <section id="dashboard">
+    <div class="section-title">
+      <div>
+        <h2>NYC Weather Analytics</h2>
+        <p>New York City · January 1–31, 2025 · Hourly observations</p>
+      </div>
+      <span class="status" id="data-status">● Loading dataset</span>
+    </div>
+
+    <div id="loading" class="loading">Loading and processing the weather dataset...</div>
+    <div id="dashboard-content" hidden>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Total observations</div>
+          <div class="metric-value" id="records">—</div>
+          <div class="metric-note">Hourly weather records</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Average temperature</div>
+          <div class="metric-value" id="avg-temp">—</div>
+          <div class="metric-note">Degrees Celsius</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Average humidity</div>
+          <div class="metric-value" id="avg-humidity">—</div>
+          <div class="metric-note">Relative humidity</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Average wind speed</div>
+          <div class="metric-value" id="avg-wind">—</div>
+          <div class="metric-note">Kilometres per hour</div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <div>
+          <h2>Environmental trends</h2>
+          <p>Explore hourly patterns across the six measured weather variables.</p>
+        </div>
+      </div>
+
+      <div class="charts">
+        <article class="panel">
+          <h3>Temperature</h3>
+          <p>Hourly temperature · °C</p>
+          <div class="chart-wrap"><canvas id="temperatureChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <h3>Relative humidity</h3>
+          <p>Hourly relative humidity · %</p>
+          <div class="chart-wrap"><canvas id="humidityChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <h3>Precipitation</h3>
+          <p>Hourly precipitation · mm</p>
+          <div class="chart-wrap"><canvas id="precipitationChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <h3>Snowfall</h3>
+          <p>Hourly snowfall · cm</p>
+          <div class="chart-wrap"><canvas id="snowfallChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <h3>Wind speed</h3>
+          <p>Hourly wind speed · km/h</p>
+          <div class="chart-wrap"><canvas id="windChart"></canvas></div>
+        </article>
+        <article class="panel">
+          <h3>Cloud cover</h3>
+          <p>Hourly cloud cover · %</p>
+          <div class="chart-wrap"><canvas id="cloudChart"></canvas></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="section-title">
+      <div>
+        <h2>Engineering architecture</h2>
+        <p>A modular pipeline from raw observations to analytics.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Data processing workflow</h3>
+      <div class="pipeline">
+        <span>Weather API / CSV</span><b>→</b>
+        <span>Python ingestion</span><b>→</b>
+        <span>Data validation</span><b>→</b>
+        <span>InfluxDB</span><b>→</b>
+        <span>Grafana</span>
+      </div>
+      <p style="margin-top:15px">
+        The project includes custom validation rules and a Great Expectations
+        validation suite before records are loaded into the time-series database.
+      </p>
+    </div>
+
+    <div class="info-grid" style="margin-top:16px">
+      <article class="info-card">
+        <h3>Data quality</h3>
+        <p>
+          Custom validation and Great Expectations checks assess data
+          integrity, expected fields, ranges, and record consistency
+          before database loading.
+        </p>
+      </article>
+      <article class="info-card">
+        <h3>Time-series storage</h3>
+        <p>
+          InfluxDB stores weather measurements as time-series data,
+          supporting time-based queries and analytical exploration.
+        </p>
+      </article>
+      <article class="info-card">
+        <h3>Visual monitoring</h3>
+        <p>
+          Grafana provides a six-panel dashboard for monitoring
+          temperature, humidity, precipitation, snowfall, wind speed,
+          and cloud cover.
+        </p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <span>Urban Analytics Data Platform · Educational project demonstration</span>
+    <span><a href="https://github.com/Tanzila-Afrin/urban-analytics-data-platform" target="_blank" rel="noopener">View source code on GitHub ↗</a></span>
+  </div>
+</footer>
+
+<script>
+const csvUrl = "/data/weather.csv";
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(",");
+  return lines.slice(1).map(line => {
+    const values = line.split(",");
+    const row = {};
+    headers.forEach((header, index) => row[header] = values[index]);
+    return row;
+  });
+}
+
+function average(rows, field) {
+  return rows.reduce((sum, row) => sum + Number(row[field]), 0) / rows.length;
+}
+
+function makeChart(id, labels, values, label, unit, color) {
+  new Chart(document.getElementById(id), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label,
+        data: values,
+        borderColor: color,
+        backgroundColor: color + "22",
+        borderWidth: 1.8,
+        pointRadius: 0,
+        pointHitRadius: 8,
+        fill: true,
+        tension: 0.25
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: context => `${label}: ${context.parsed.y.toFixed(1)} ${unit}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#91a3bd",
+            maxTicksLimit: 8,
+            maxRotation: 0
+          },
+          grid: { display: false }
+        },
+        y: {
+          ticks: { color: "#91a3bd", maxTicksLimit: 5 },
+          grid: { color: "#263650" }
+        }
+      }
+    }
+  });
+}
+
+async function loadDashboard() {
+  const loading = document.getElementById("loading");
+  const status = document.getElementById("data-status");
+
+  try {
+    const response = await fetch(csvUrl);
+    if (!response.ok) throw new Error("Could not load the weather CSV.");
+
+    const rows = parseCSV(await response.text());
+    if (!rows.length) throw new Error("The weather dataset is empty.");
+
+    const labels = rows.map(row => row.timestamp.replace("T", " "));
+    const fields = [
+      ["temperatureChart", "temperature_2m", "Temperature", "°C", "#55d6be"],
+      ["humidityChart", "relative_humidity_2m", "Humidity", "%", "#66a9ff"],
+      ["precipitationChart", "precipitation", "Precipitation", "mm", "#b49aff"],
+      ["snowfallChart", "snowfall", "Snowfall", "cm", "#8bd5ff"],
+      ["windChart", "wind_speed_10m", "Wind speed", "km/h", "#ffbd69"],
+      ["cloudChart", "cloud_cover", "Cloud cover", "%", "#c0a6ff"]
+    ];
+
+    document.getElementById("records").textContent = rows.length.toLocaleString();
+    document.getElementById("avg-temp").textContent = average(rows, "temperature_2m").toFixed(1) + " °C";
+    document.getElementById("avg-humidity").textContent = average(rows, "relative_humidity_2m").toFixed(1) + "%";
+    document.getElementById("avg-wind").textContent = average(rows, "wind_speed_10m").toFixed(1) + " km/h";
+
+    fields.forEach(([id, field, label, unit, color]) => {
+      makeChart(id, labels, rows.map(row => Number(row[field])), label, unit, color);
+    });
+
+    loading.hidden = true;
+    document.getElementById("dashboard-content").hidden = false;
+    status.textContent = "● Dataset loaded · " + rows.length + " records";
+  } catch (error) {
+    loading.innerHTML = '<span class="error">Dataset loading failed: ' + error.message +
+      '</span><br><small>Check that public/data/weather.csv exists and is deployed.</small>';
+    status.textContent = "● Data unavailable";
+    status.style.color = "#ff9c9c";
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
