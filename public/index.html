@@ -141,6 +141,7 @@
     <nav>
       <a href="#dashboard">Dashboard</a>
       <a href="#pipeline">Architecture</a>
+      <a href="#fabric">Microsoft Fabric</a>
       <a href="https://github.com/Tanzila-Afrin/urban-analytics-data-platform" target="_blank" rel="noopener">GitHub ↗</a>
     </nav>
   </div>
@@ -289,6 +290,100 @@
         </p>
       </article>
     </div>
+
+  <section id="fabric">
+    <div class="section-title">
+      <div>
+        <h2>Microsoft Fabric — Urban Mobility Analytics</h2>
+        <p>End-to-end cloud analytics pipeline using NYC Yellow Taxi trip data · January 2025</p>
+      </div>
+      <span class="status">Pipeline verified</span>
+    </div>
+
+    <div class="panel">
+      <h3>Lakehouse Medallion Architecture</h3>
+      <p>Scalable data processing and analytics using Microsoft Fabric and PySpark.</p>
+
+      <div class="pipeline">
+        <span>NYC Taxi Parquet</span><b>→</b>
+        <span>Bronze Layer</span><b>→</b>
+        <span>Silver Layer</span><b>→</b>
+        <span>Gold Layer</span><b>→</b>
+        <span>Power BI</span>
+      </div>
+
+      <p style="margin-top:15px">
+        Raw taxi trip data is ingested into the Lakehouse Bronze layer,
+        cleaned and transformed using PySpark in the Silver layer,
+        and aggregated into analytical Gold tables for reporting.
+      </p>
+    </div>
+
+    <div class="metrics" style="margin-top:16px">
+      <div class="metric">
+        <div class="metric-label">Bronze records</div>
+        <div class="metric-value">3.47M</div>
+        <div class="metric-note">Raw taxi trips</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Silver records</div>
+        <div class="metric-value">3.33M</div>
+        <div class="metric-note">Cleaned and validated trips</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Gold tables</div>
+        <div class="metric-value">4</div>
+        <div class="metric-note">Analytical datasets</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Silver data retained</div>
+        <div class="metric-value">95.75%</div>
+        <div class="metric-note">Of original Bronze records</div>
+      </div>
+    </div>
+
+    <div class="info-grid" style="margin-top:16px">
+      <article class="info-card">
+        <h3>Data engineering</h3>
+        <p>
+          PySpark transformations, null handling, duplicate removal,
+          trip-duration calculations, data filtering and Delta Lake storage.
+        </p>
+      </article>
+      <article class="info-card">
+        <h3>Analytical modeling</h3>
+        <p>
+          Four Gold tables covering daily analytics, hourly demand,
+          pickup locations and drop-off locations.
+        </p>
+      </article>
+      <article class="info-card">
+        <h3>Business intelligence</h3>
+        <p>
+          A Power BI dashboard integrated with a Fabric semantic model
+          to explore taxi demand, revenue and trip patterns.
+        </p>
+      </article>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <h3>Explore the Fabric dashboard</h3>
+      <p>
+        Open the Microsoft Fabric-hosted dashboard to explore the
+        urban mobility analytics results. Microsoft account access
+        and appropriate workspace permissions may be required.
+      </p>
+      <a
+        href="https://app.fabric.microsoft.com/links/rVDvS8YDox?ctid=0f09ffc7-dd3a-49a2-bbb2-c3576bec8012&pbi_source=linkShare"
+        target="_blank"
+        rel="noopener"
+      >
+        Open Microsoft Fabric Dashboard →
+      </a>
+    </div>
+  </section>
+</main>
+
   </section>
 </main>
 
